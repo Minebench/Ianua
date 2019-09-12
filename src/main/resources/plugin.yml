@@ -1,0 +1,22 @@
+name: Ianua
+version: '${minecraft.plugin.version}'
+main: de.minebench.ianua.Ianua
+api-version: 1.13
+authors: [Phoenix616]
+description: Simple Bungee portal plugin
+commands:
+  ianua:
+    aliases: [bungeeportal, bportal, iportal]
+    description: Main plugin command
+    permission: ianua.command
+    usage: /<command> [info|reload]
+permissions:
+  ianua.create:
+    default: false
+    description: Allows creation of portals
+  ianua.use:
+    default: op
+    description: Allows usage of portals
+  ianua.use.<server-name>:
+    default: op
+    description: Allows usage of a specific server portal

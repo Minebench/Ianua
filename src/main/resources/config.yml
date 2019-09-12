@@ -1,0 +1,7 @@
+portalTurnPlayer: false
+portalDistance: 3
+blockMessages: false
+lang:
+  noPermission: You don't have permission to use Server Portals!
+  noServerPermission: You don't have permission to use the %server% portal!
+signIdentifier: server
