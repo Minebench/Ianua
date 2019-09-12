@@ -171,6 +171,8 @@ public final class Ianua extends JavaPlugin implements Listener {
             return;
         }
 
+        teleportOutOfPortal(player);
+
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(b);
         try {
