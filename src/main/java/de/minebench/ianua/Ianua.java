@@ -214,7 +214,7 @@ public final class Ianua extends JavaPlugin implements Listener {
         Location location = player.getLocation();
         float originalPitch = location.getPitch();
         location.setPitch(0);
-        Vector vec = location.getDirection().multiply(portalDistance);
+        Vector vec = location.getDirection().normalize().multiply(portalDistance);
         location = location.add(vec.multiply(-1));
         location.setPitch(originalPitch);
         if (portalTurnPlayer) {
