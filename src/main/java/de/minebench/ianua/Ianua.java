@@ -121,7 +121,7 @@ public final class Ianua extends JavaPlugin implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void on(SignChangeEvent e) {
         if (e.getLine(0).equalsIgnoreCase("[" + signIdentifier + "]")) {
-            if (e.getPlayer().hasPermission("ianua.create")){
+            if (!e.getPlayer().hasPermission("ianua.create")){
                 e.setCancelled(true);
                 e.getPlayer().sendMessage(ChatColor.RED + "You don't have the permission to create server portals!");
             } else {
@@ -161,12 +161,12 @@ public final class Ianua extends JavaPlugin implements Listener {
         }
         e.setCancelled(true);
 
-        if (!player.hasPermission("iuana.use")) {
+        if (!player.hasPermission("ianua.use")) {
             player.sendMessage(noPermission);
             return;
         }
 
-        if (!player.hasPermission("iuana.use." + server)) {
+        if (!player.hasPermission("ianua.use." + server)) {
             player.sendMessage(noServerPermission.replace("%server%", server));
             return;
         }
