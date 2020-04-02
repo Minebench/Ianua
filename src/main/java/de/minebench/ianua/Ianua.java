@@ -37,6 +37,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -45,6 +46,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +57,9 @@ public final class Ianua extends JavaPlugin implements Listener {
     private final static Set<Material> PORTAL_BLOCKS = EnumSet.of(Material.WATER, Material.LAVA, Material.SUGAR_CANE);
     private static final String NO_PORTAL = "IANUA:NO_PORTAL";
     private final Cache<Portal, String> portalCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).build();
+    private final Map<UUID, Long> portalCooldowns = new HashMap<>();
     private int portalDistance = 3;
+    private long portalCooldown = 1000;
     private boolean portalTurnPlayer;
     private boolean blockMessages;
     private String noPermission;
@@ -102,6 +107,8 @@ public final class Ianua extends JavaPlugin implements Listener {
         portalTurnPlayer = getConfig().getBoolean("portalTurnPlayer");
         portalDistance = getConfig().getInt("portalDistance");
         if (portalDistance < 0) portalDistance = 0;
+        portalCooldown = getConfig().getLong("portalCooldown");
+        if (portalCooldown < 0) portalCooldown = 0;
         blockMessages = getConfig().getBoolean("blockMessages");
         noPermission = ChatColor.translateAlternateColorCodes('&', getConfig().getString("lang.noPermission"));
         noServerPermission = ChatColor.translateAlternateColorCodes('&', getConfig().getString("lang.noServerPermission"));
@@ -154,12 +161,24 @@ public final class Ianua extends JavaPlugin implements Listener {
         handlePortal(e.getPlayer(), e.getFrom().getBlock(), e);
     }
 
+    @EventHandler
+    public void on(PlayerQuitEvent e) {
+        portalCooldowns.remove(e.getPlayer().getUniqueId());
+    }
+
     private void handlePortal(Player player, Block block, Cancellable e) {
         String server = findPortal(block);
         if (server == null) {
             return;
         }
         e.setCancelled(true);
+
+        if (portalCooldowns.getOrDefault(player.getUniqueId(), System.currentTimeMillis()) + portalCooldown > System.currentTimeMillis()) {
+            return;
+        }
+        portalCooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+
+        teleportOutOfPortal(player);
 
         if (!player.hasPermission("ianua.use")) {
             player.sendMessage(noPermission);
@@ -170,8 +189,6 @@ public final class Ianua extends JavaPlugin implements Listener {
             player.sendMessage(noServerPermission.replace("%server%", server));
             return;
         }
-
-        teleportOutOfPortal(player);
 
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(b);
